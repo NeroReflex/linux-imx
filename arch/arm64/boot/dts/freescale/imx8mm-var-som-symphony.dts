@@ -399,7 +399,6 @@
 	no-1-8-v;
 	non-removable;
 	status = "okay";
-
 };
 
 &gpio4 {

@@ -1395,6 +1395,8 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
 	u32 rocr = 0;
 	bool v18_fixup_failed = false;
 
+	const char* const mmc_hn = mmc_hostname(host);
+
 	WARN_ON(!host->claimed);
 retry:
 	err = mmc_sd_get_cid(host, ocr, cid, &rocr);
@@ -1433,14 +1435,20 @@ retry:
 	 */
 	if (!mmc_host_is_spi(host)) {
 		err = mmc_send_relative_addr(host, &card->rca);
-		if (err)
+		if (err) {
+			pr_err("%s mmc_send_relative_addr: Failed with %d\n",
+				mmc_hn, err);
 			goto free_card;
+		}
 	}
 
 	if (!oldcard) {
 		err = mmc_sd_get_csd(card);
-		if (err)
+		if (err) {
+			pr_err("%s mmc_sd_get_csd: Failed with %d\n",
+				mmc_hn, err);
 			goto free_card;
+		}
 
 		mmc_decode_cid(card);
 	}
@@ -1457,13 +1465,19 @@ retry:
 	 */
 	if (!mmc_host_is_spi(host)) {
 		err = mmc_select_card(card);
-		if (err)
+		if (err) {
+			pr_err("%s mmc_select_card: Failed with %d\n",
+				mmc_hn, err);
 			goto free_card;
+		}
 	}
 
 	err = mmc_sd_setup_card(host, card, oldcard != NULL);
-	if (err)
+	if (err) {
+		pr_err("%s mmc_sd_setup_card: Failed with %d\n",
+			mmc_hn, err);
 		goto free_card;
+	}
 
 	/*
 	 * If the card has not been power cycled, it may still be using 1.8V
@@ -1479,8 +1493,11 @@ retry:
 		 */
 		if (oldcard) {
 			err = mmc_read_switch(card);
-			if (err)
+			if (err) {
+				pr_err("%s mmc_read_switch: Failed with %d\n",
+					mmc_hn, err);
 				goto free_card;
+			}
 		}
 		if (mmc_sd_card_using_v18(card)) {
 			if (mmc_host_set_uhs_voltage(host) ||
@@ -1498,8 +1515,11 @@ retry:
 	/* Initialization sequence for UHS-I cards */
 	if (rocr & SD_ROCR_S18A && mmc_host_uhs(host)) {
 		err = mmc_sd_init_uhs_card(card);
-		if (err)
+		if (err) {
+			pr_err("%s mmc_sd_init_uhs_card: Failed with %d\n",
+				mmc_hn, err);	
 			goto free_card;
+		}
 	} else {
 		/*
 		 * Attempt to change to high-speed (if supported)
@@ -1507,13 +1527,28 @@ retry:
 		err = mmc_sd_switch_hs(card);
 		if (err > 0)
 			mmc_set_timing(card->host, MMC_TIMING_SD_HS);
-		else if (err)
+		else if (err) {
+			pr_err("%s mmc_sd_switch_hs: Failed with %d\n",
+				mmc_hn, err);
 			goto free_card;
+		}
 
 		/*
 		 * Set bus speed.
 		 */
-		mmc_set_clock(host, mmc_sd_get_max_clock(card));
+		const unsigned supported_clock = mmc_sd_get_max_clock(card);
+		const unsigned current_clock = host->ios.clock;
+		pr_warn("SD card supports clock up to %u Hz, currently using %u Hz.", supported_clock, current_clock);
+
+		const unsigned quarter_clock = supported_clock / 4U;
+		unsigned selected_clock = 2U * quarter_clock;
+
+		const unsigned clock_diff = supported_clock - selected_clock;
+
+		selected_clock += 0 /*clock_diff / 2*/;
+
+		pr_warn("SD card new clock set to %u Hz", selected_clock);
+		mmc_set_clock(host, selected_clock);
 
 		/*
 		 * Switch to wider bus (if supported).
@@ -1521,8 +1556,11 @@ retry:
 		if ((host->caps & MMC_CAP_4_BIT_DATA) &&
 			(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
 			err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
-			if (err)
+			if (err) {
+				pr_err("%s mmc_app_set_bus_width: Failed with %d\n",
+					mmc_hn, err);
 				goto free_card;
+			}
 
 			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
 		}
@@ -1531,15 +1569,21 @@ retry:
 	if (!oldcard) {
 		/* Read/parse the extension registers. */
 		err = sd_read_ext_regs(card);
-		if (err)
+		if (err) {
+			pr_err("%s sd_read_ext_regs: Failed with %d\n",
+				mmc_hn, err);
 			goto free_card;
+		}
 	}
 
 	/* Enable internal SD cache if supported. */
 	if (card->ext_perf.feature_support & SD_EXT_PERF_CACHE) {
 		err = sd_enable_cache(card);
-		if (err)
+		if (err) {
+			pr_err("%s sd_enable_cache: Failed with %d\n",
+				mmc_hn, err);
 			goto free_card;
+		}
 	}
 
 	if (host->cqe_ops && !host->cqe_enabled) {
@@ -1812,6 +1856,8 @@ int mmc_attach_sd(struct mmc_host *host)
 	int err;
 	u32 ocr, rocr;
 
+	const char *const mmc_hn = mmc_hostname(host);
+
 	WARN_ON(!host->claimed);
 
 	err = mmc_send_app_op_cond(host, 0, &ocr);
@@ -1829,8 +1875,10 @@ int mmc_attach_sd(struct mmc_host *host)
 		mmc_go_idle(host);
 
 		err = mmc_spi_read_ocr(host, 0, &ocr);
-		if (err)
+		if (err) {
+			pr_err("%s mmc_spi_read_ocr: error %d whilst initialising SD card\n", mmc_hn, err);
 			goto err;
+		}
 	}
 
 	/*
@@ -1845,6 +1893,7 @@ int mmc_attach_sd(struct mmc_host *host)
 	 * Can we support the voltage(s) of the card(s)?
 	 */
 	if (!rocr) {
+		pr_err("%s mmc_select_voltage: error %d whilst initialising SD card\n", mmc_hn, err);
 		err = -EINVAL;
 		goto err;
 	}
@@ -1853,13 +1902,17 @@ int mmc_attach_sd(struct mmc_host *host)
 	 * Detect and init the card.
 	 */
 	err = mmc_sd_init_card(host, rocr, NULL);
-	if (err)
+	if (err) {
+		pr_err("%s mmc_sd_init_card: error %d whilst initialising SD card\n", mmc_hn, err);
 		goto err;
+	}
 
 	mmc_release_host(host);
 	err = mmc_add_card(host->card);
-	if (err)
+	if (err) {
+		pr_err("%s mmc_add_card: error %d whilst initialising SD card\n", mmc_hn, err);
 		goto remove_card;
+	}
 
 	mmc_claim_host(host);
 	return 0;
@@ -1870,9 +1923,6 @@ remove_card:
 	mmc_claim_host(host);
 err:
 	mmc_detach_bus(host);
-
-	pr_err("%s: error %d whilst initialising SD card\n",
-		mmc_hostname(host), err);
 
 	return err;
 }
