@@ -7,7 +7,7 @@
 #include "imx8mm-var-som.dtsi"
 
 / {
-	model = "Variscite VAR-SOM-MX8M-MINI on Symphony-Board";
+	model = "Variscite VAR-SOM-MX8M-MINI on MT376R2-Board";
 
 	chosen {
 		stdout-path = &uart4;
@@ -108,6 +108,13 @@
 	sda-gpios = <&gpio5 17 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 
+	/* DS1337 RTC module */
+	mcp_rtc: rtc@6f {
+			compatible = "microchip,mcp7941x";
+			reg = <0x6f>;
+			status = "okay";
+	};
+
 	/* USB Type-C Controller */
 	extcon_ptn5150: typec@3d {
 		compatible = "nxp,ptn5150";
@@ -117,7 +124,7 @@
 		interrupt-parent = <&gpio1>;
 		interrupts = <11 IRQ_TYPE_NONE>;
 		irq-is-id-quirk;
-		status ="okay";
+		status ="disabled";
 
 		port {
 			typec1_dr_sw: endpoint {
@@ -146,7 +153,7 @@
 		rst-gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
 		mclk = <24000000>;
 		mclk_source = <0>;
-		status = "okay";
+		status = "disabled";
 
 		port {
 			ov5640_mipi1_ep: endpoint {
@@ -166,6 +173,7 @@
 		interrupts = <7 IRQ_TYPE_EDGE_FALLING>;
 		#gpio-cells = <2>;
 		wakeup-source;
+		status = "disabled";
 
 		usb3_sel_hog {
 			gpio-hog;
@@ -198,27 +206,23 @@
 };
 
 &i2c3 {
-	/* Capacitive touch controller */
-	ft5x06_ts: ft5x06_ts@38 {
-		compatible = "edt,edt-ft5206";
-		reg = <0x38>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_captouch>;
+	touchscreen@41 {
+		compatible = "ilitek,ili251x";
+		reg = <0x41>;
+
 		interrupt-parent = <&gpio5>;
-		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
+		interrupts = <4 IRQ_TYPE_LEVEL_LOW>;
 		touchscreen-size-x = <800>;
 		touchscreen-size-y = <480>;
-		touchscreen-inverted-x;
-		touchscreen-inverted-y;
-		wakeup-source;
-		status = "okay";
-	};
+		#reset-gpios = <&gpio1 8 GPIO_ACTIVE_LOW>;
 
-	/* DS1337 RTC module */
-	rtc@68 {
-		compatible = "dallas,ds1337";
-		reg = <0x68>;
-		status = "okay";
+		#touchscreen-size-x;
+		#touchscreen-size-y;
+		#touchscreen-inverted-x;
+		#touchscreen-inverted-y;
+		#touchscreen-swapped-x-y;
+
+		wakeup-source;
 	};
 };
 
@@ -265,21 +269,21 @@
 
 &panel_lvds {
 	compatible = "panel-lvds";
-	data-mapping = "jeida-24";
+	data-mapping = "vesa-24";
 	width-mm = <154>;
 	height-mm = <87>;
 	backlight = <&backlight>;
 
 	panel-timing {
-		clock-frequency = <33000000>;
+		clock-frequency = <36000000>;
 		hactive = <800>;
 		vactive = <480>;
-		hback-porch = <40>;
-		hfront-porch = <40>;
-		vback-porch = <29>;
-		vfront-porch = <13>;
-		hsync-len = <48>;
-		vsync-len = <3>;
+		hback-porch = <16>;
+		hfront-porch = <44>;
+		vback-porch = <5>;
+		vfront-porch = <43>;
+		hsync-len = <2>;
+		vsync-len = <2>;
 		hsync-active = <0>;
 		vsync-active = <0>;
 		de-active = <1>;
@@ -305,7 +309,7 @@
 				 <&clk IMX8MM_SYS_PLL2_250M>;
 	ext_osc = <1>;
 	l1ss-disabled;
-	status = "okay";
+	status = "disabled";
 };
 
 &pcie0_ep {
@@ -353,7 +357,7 @@
 };
 
 &usbotg1 {
-	dr_mode = "otg";
+	dr_mode = "host";
 	hnp-disable;
 	srp-disable;
 	adp-disable;
@@ -381,6 +385,8 @@
 
 /* SD */
 &usdhc2 {
+	assigned-clocks = <&clk IMX8MM_CLK_USDHC2>;
+        assigned-clock-rates = <200000000>;
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
@@ -388,6 +394,8 @@
 	cd-gpios = <&gpio1 10 GPIO_ACTIVE_LOW>;
 	bus-width = <4>;
 	vmmc-supply = <&reg_usdhc2_vmmc>;
+	#no-1-8-v;
+	non-removable;
 	status = "okay";
 };
 
