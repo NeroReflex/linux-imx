@@ -26,6 +26,8 @@
 #include "sd.h"
 #include "sd_ops.h"
 
+#define MAX_SD_CARD_SPEED 12500000U
+
 static const unsigned int tran_exp[] = {
 	10000,		100000,		1000000,	10000000,
 	0,		0,		0,		0
@@ -513,7 +515,9 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
 			mmc_hostname(card->host));
 	else {
 		mmc_set_timing(card->host, timing);
-		mmc_set_clock(card->host, card->sw_caps.uhs_max_dtr);
+		const unsigned selected_clock = card->sw_caps.uhs_max_dtr > MAX_SD_CARD_SPEED ? MAX_SD_CARD_SPEED : card->sw_caps.uhs_max_dtr;
+		pr_warn("UHS-I SD card new clock set to %u Hz", selected_clock);
+		mmc_set_clock(card->host, selected_clock);
 	}
 
 	return 0;
@@ -1513,7 +1517,10 @@ retry:
 		/*
 		 * Set bus speed.
 		 */
-		mmc_set_clock(host, mmc_sd_get_max_clock(card));
+		const unsigned supported_clock = mmc_sd_get_max_clock(card);
+		const unsigned selected_clock = supported_clock > MAX_SD_CARD_SPEED ? MAX_SD_CARD_SPEED : supported_clock;
+		pr_warn("SD card new clock set to %u Hz", selected_clock);
+		mmc_set_clock(host, selected_clock);
 
 		/*
 		 * Switch to wider bus (if supported).
