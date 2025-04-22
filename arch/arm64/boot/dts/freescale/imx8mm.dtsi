@@ -1401,6 +1401,7 @@
 
 		gpu_3d: gpu@38000000 {
 			compatible = "vivante,gc";
+			status = "okay";
 			reg = <0x38000000 0x8000>;
 			interrupts = <GIC_SPI 3 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&clk IMX8MM_CLK_GPU_AHB>,
@@ -1417,6 +1418,7 @@
 
 		gpu_2d: gpu@38008000 {
 			compatible = "vivante,gc";
+			status = "okay";
 			reg = <0x38008000 0x8000>;
 			interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&clk IMX8MM_CLK_GPU_AHB>,
