@@ -8,7 +8,7 @@
 #include "imx8mm-var-som.dtsi"
 
 / {
-	model = "Variscite VAR-SOM-MX8MM Symphony evaluation board";
+	model = "Variscite VAR-SOM-MX8MM on MT376R2 board";
 	compatible = "variscite,var-som-mx8mm-symphony", "variscite,var-som-mx8mm", "fsl,imx8mm";
 
 	reg_usdhc2_vmmc: regulator-usdhc2-vmmc {
@@ -76,6 +76,13 @@
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
 
+	/* RTC module */
+	mcp_rtc: rtc@6f {
+		compatible = "microchip,mcp7941x";
+		reg = <0x6f>;
+		status = "okay";
+	};
+
 	pca9534: gpio@20 {
 		compatible = "nxp,pca9534";
 		reg = <0x20>;
@@ -86,6 +93,7 @@
 		interrupts = <7 IRQ_TYPE_EDGE_FALLING>;
 		#gpio-cells = <2>;
 		wakeup-source;
+		status = "disabled";
 
 		/* USB 3.0 OTG (usbotg1) / SATA port switch, set to USB 3.0 */
 		usb3-sata-sel-hog {
@@ -117,6 +125,7 @@
 		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_ptn5150>;
+		status = "disabled";
 	};
 };
 
@@ -129,6 +138,7 @@
 		pinctrl-0 = <&pinctrl_captouch>;
 		interrupt-parent = <&gpio5>;
 		interrupts = <4 IRQ_TYPE_LEVEL_HIGH>;
+		status = "disabled";
 
 		touchscreen-size-x = <800>;
 		touchscreen-size-y = <480>;
@@ -136,9 +146,17 @@
 		touchscreen-inverted-y;
 	};
 
+	touchscreen@41 {
+		compatible = "ilitek,ili251x";
+ 		reg = <0x41>;
+		interrupts = <4 IRQ_TYPE_LEVEL_LOW>;
+		status = "okay";
+	};
+
 	rtc@68 {
 		compatible = "dallas,ds1337";
 		reg = <0x68>;
+		status = "disabled";
 	};
 };
 
@@ -178,6 +196,11 @@
 	 * [    1.980987] hub 1-0:1.0: 1 port detected
 	 */
 	status = "disabled";
+};
+
+/* SD: add non-removable to be able to boot from it */
+&usdhc2 {
+	non-removable;
 };
 
 &pinctrl_fec1 {
