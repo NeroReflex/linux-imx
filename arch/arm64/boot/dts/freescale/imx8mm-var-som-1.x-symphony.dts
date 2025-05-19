@@ -66,6 +66,30 @@
 	};
 };
 
+&panel_lvds {
+	compatible = "panel-lvds";
+	data-mapping = "vesa-24";
+	width-mm = <154>;
+	height-mm = <87>;
+	backlight = <&backlight>;
+
+	panel-timing {
+		clock-frequency = <36000000>;
+		hactive = <800>;
+		vactive = <480>;
+		hback-porch = <16>;
+		hfront-porch = <44>;
+		vback-porch = <5>;
+		vfront-porch = <43>;
+		hsync-len = <2>;
+		vsync-len = <2>;
+		hsync-active = <0>;
+		vsync-active = <0>;
+		de-active = <1>;
+		pixelclk-active = <0>;
+	};
+};
+
 &ethphy {
 	reset-gpios = <&pca9534 5 GPIO_ACTIVE_HIGH>;
 };
