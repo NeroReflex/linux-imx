@@ -29,6 +29,7 @@
 #include <linux/delay.h>
 #include <linux/mxcfb.h>
 #include <linux/of_device.h>
+#include <asm/thread_info.h>
 #include <media/v4l2-chip-ident.h>
 #include <media/v4l2-ioctl.h>
 #include <media/v4l2-device.h>
@@ -266,7 +267,7 @@ static int mxc_allocate_frame_buf(cam_data *cam, int count)
 		cam->frame[i].vaddress =
 		    dma_alloc_coherent(cam->dev,
 				       PAGE_ALIGN(cam->v2f.fmt.pix.sizeimage),
-				       &cam->frame[i].paddress,
+				       (dma_addr_t *)&cam->frame[i].paddress,
 				       GFP_DMA | GFP_KERNEL);
 		if (cam->frame[i].vaddress == 0) {
 			pr_err("ERROR: v4l2 capture: "

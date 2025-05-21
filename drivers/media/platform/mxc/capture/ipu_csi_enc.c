@@ -242,7 +242,7 @@ static int csi_enc_enabling_tasks(void *private)
 
 	cam->dummy_frame.vaddress = dma_alloc_coherent(cam->dev,
 			       PAGE_ALIGN(cam->v2f.fmt.pix.sizeimage),
-			       &cam->dummy_frame.paddress,
+			       (dma_addr_t *)&cam->dummy_frame.paddress,
 			       GFP_DMA | GFP_KERNEL);
 	if (cam->dummy_frame.vaddress == 0) {
 		pr_err("ERROR: v4l2 capture: Allocate dummy frame "
