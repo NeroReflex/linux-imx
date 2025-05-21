@@ -332,7 +332,7 @@ static int imx_pcm512x_hw_params(struct snd_pcm_substream *substream,
 
 	/* set MCLK freq */
 	if (data->dac_pluspro && data->dac_sclk) {
-		if (do_div(rate, 8000)) {
+		if (do_div(rate, (unsigned int)8000)) {
 			mclk_freq = DAC_CLK_EXT_44K;
 			imx_pcm512x_select_ext_clk(comp, DAC_CLK_EXT_44EN);
 			ret = snd_soc_dai_set_sysclk(codec_dai,
