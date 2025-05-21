@@ -187,6 +187,7 @@
 
 &i2c3 {
 	/* Capacitive touch controller */
+	/*
 	ft5x06_ts: touchscreen@38 {
 		compatible = "edt,edt-ft5406";
 		reg = <0x38>;
@@ -201,13 +202,16 @@
 		touchscreen-inverted-x;
 		touchscreen-inverted-y;
 	};
+	*/
 
+	/*
 	touchscreen@41 {
 		compatible = "ilitek,ili251x";
  		reg = <0x41>;
 		interrupts = <4 IRQ_TYPE_LEVEL_LOW>;
 		status = "disabled";
 	};
+	*/
 
 	rtc@68 {
 		compatible = "dallas,ds1337";
