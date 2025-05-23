@@ -32,9 +32,11 @@
 	};
 };
 
+/*
 &pcie0 {
 	status = "disabled";
 };
+*/
 
 &pcie0_refclk {
 	status = "disabled";
