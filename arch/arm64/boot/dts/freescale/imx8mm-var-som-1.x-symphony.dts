@@ -4,7 +4,7 @@
  * Copyright 2019-2025 Variscite Ltd.
  */
 
-#include "imx8mm-var-som-symphony.dtsi"
+#include "imx8mm-var-som-symphony.dts"
 
 / {
 	model = "Variscite VAR-SOM-MX8M-MINI on MT376R2V1H0";
@@ -69,7 +69,7 @@
 		#touchscreen-swapped-x-y;
 
 		wakeup-source;
-	}
+	};
 };
 
 &i2c2 {
