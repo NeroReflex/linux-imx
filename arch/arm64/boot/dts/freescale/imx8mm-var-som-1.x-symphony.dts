@@ -84,28 +84,67 @@
 };
 
 &panel_lvds {
-	compatible = "panel-lvds";
 	data-mapping = "vesa-24";
-	width-mm = <154>;
-	height-mm = <87>;
-	backlight = <&backlight>;
 
 	panel-timing {
-		clock-frequency = <36000000>;
+		clock-frequency = <33000000>;
 		hactive = <800>;
 		vactive = <480>;
-		hback-porch = <16>;
-		hfront-porch = <44>;
-		vback-porch = <5>;
-		vfront-porch = <43>;
-		hsync-len = <2>;
-		vsync-len = <2>;
+		hback-porch = <30>;
+		hfront-porch = <30>;
+		vback-porch = <29>;
+		vfront-porch = <13>;
+		hsync-len = <48>;
+		vsync-len = <3>;
 		hsync-active = <0>;
 		vsync-active = <0>;
 		de-active = <1>;
 		pixelclk-active = <0>;
 	};
 };
+
+&panel_lvds {
+	compatible = "panel-lvds";
+	data-mapping = "vesa-24";
+	width-mm = <154>;
+	height-mm = <87>;
+};
+
+
+&panel_lvds_timings {
+	clock-frequency = <36000000>;
+	hactive = <800>;
+	vactive = <480>;
+	hback-porch = <30>;
+	hfront-porch = <30>;
+	vback-porch = <29>;
+	vfront-porch = <13>;
+	hsync-len = <48>;
+	vsync-len = <3>;
+	hsync-active = <0>;
+	vsync-active = <0>;
+	de-active = <1>;
+	pixelclk-active = <0>;
+};
+
+
+/*
+&panel_lvds_timings {
+	clock-frequency = <36000000>;
+	hactive = <800>;
+	vactive = <480>;
+	hback-porch = <16>;
+	hfront-porch = <44>;
+	vback-porch = <5>;
+	vfront-porch = <43>;
+	hsync-len = <2>;
+	vsync-len = <2>;
+	hsync-active = <0>;
+	vsync-active = <0>;
+	de-active = <1>;
+	pixelclk-active = <0>;
+};
+*/
 
 &iomuxc {
 	pinctrl_beeper: beepergrp {

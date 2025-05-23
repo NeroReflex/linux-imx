@@ -273,7 +273,7 @@
 	height-mm = <87>;
 	backlight = <&backlight>;
 
-	panel-timing {
+	panel_lvds_timings: panel-timing {
 		clock-frequency = <33000000>;
 		hactive = <800>;
 		vactive = <480>;
