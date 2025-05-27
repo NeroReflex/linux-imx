@@ -62,8 +62,11 @@
 	touchscreen@41 {
 		compatible = "ilitek,ili251x";
 		reg = <0x41>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_extcon>;
+		interrupt-parent = <&gpio5>;
 		interrupts = <4 IRQ_TYPE_LEVEL_LOW>;
-		#reset-gpios = <&gpio1 8 GPIO_ACTIVE_LOW>;
+		#reset-gpios = <&gpio2 19 GPIO_ACTIVE_LOW>;
 		#touchscreen-size-x;
 		#touchscreen-size-y;
 		#touchscreen-inverted-x;
