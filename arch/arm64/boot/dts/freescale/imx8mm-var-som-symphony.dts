@@ -98,7 +98,7 @@
 		gpio = <&gpio5 1 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 	};
-};
+}
 
 &i2c2 {
 	clock-frequency = <100000>;
