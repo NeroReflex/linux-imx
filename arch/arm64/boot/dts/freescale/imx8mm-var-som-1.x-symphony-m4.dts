@@ -107,10 +107,6 @@
 	pixelclk-active = <0>;
 };
 
-&backlight {
-	default-brightness-level = <0>;
-};
-
 &iomuxc {
 	pinctrl_beeper: beepergrp {
 		fsl,pins = <

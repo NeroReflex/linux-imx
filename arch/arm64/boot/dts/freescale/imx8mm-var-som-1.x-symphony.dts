@@ -75,10 +75,6 @@
 	};
 };
 
-&backlight {
-	default-brightness-level = <0>;
-};
-
 &i2c2 {
 	/* DS1337 RTC module */
 	mcp_rtc: rtc@6f {
