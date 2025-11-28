@@ -125,6 +125,8 @@ mmc_bus_uevent(const struct device *dev, struct kobj_uevent_env *env)
 
 static int mmc_bus_probe(struct device *dev)
 {
+	pr_warn("Probe the MMC bus type");
+
 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
 	struct mmc_card *card = mmc_dev_to_card(dev);
 
