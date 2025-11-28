@@ -491,6 +491,8 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
 	int err;
 	unsigned int timing = 0;
 
+	pr_info("Setting SD bus speed mode");
+
 	switch (card->sd_bus_speed) {
 	case UHS_SDR104_BUS_SPEED:
 		timing = MMC_TIMING_UHS_SDR104;
@@ -513,15 +515,18 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
 		card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
 		break;
 	default:
+		pr_warn("Leaving SD clock untouched");
 		return 0;
 	}
 
 	err = mmc_sd_switch(card, 1, 0, card->sd_bus_speed, status);
-	if (err)
+	if (err) {
+		pr_err("Error in MMC SD switch");
 		return err;
+	}
 
 	if ((status[16] & 0xF) != card->sd_bus_speed)
-		pr_warn("%s: Problem setting bus speed mode!\n",
+		pr_err("%s: Problem setting bus speed mode!\n",
 			mmc_hostname(card->host));
 	else {
 		mmc_set_timing(card->host, timing);
@@ -639,8 +644,10 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
 
 	/* Set 4-bit bus width */
 	err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
-	if (err)
+	if (err) {
+		pr_err("Error setting SD bus width: %d", err);
 		goto out;
+	}
 
 	mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
 
@@ -652,18 +659,24 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
 
 	/* Set the driver strength for the card */
 	err = sd_select_driver_type(card, status);
-	if (err)
+	if (err) {
+		pr_err("Error selecting SD driver type: %d", err);
 		goto out;
+	}
 
 	/* Set current limit for the card */
 	err = sd_set_current_limit(card, status);
-	if (err)
+	if (err) {
+		pr_err("Error setting SD current limit: %d", err);
 		goto out;
+	}
 
 	/* Set bus speed mode of the card */
 	err = sd_set_bus_speed_mode(card, status);
-	if (err)
+	if (err) {
+		pr_err("Error setting SD bus speed: %d", err);
 		goto out;
+	}
 
 	/*
 	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
@@ -1497,6 +1510,7 @@ retry:
 	    host->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
 		if (mmc_host_set_uhs_voltage(host) ||
 		    mmc_sd_init_uhs_card(card)) {
+			pr_warn("Error in mmc_sd_init_card setting either voltage or init");
 			v18_fixup_failed = true;
 			mmc_power_cycle(host, ocr);
 			if (!oldcard)
@@ -1594,6 +1608,8 @@ cont:
 free_card:
 	if (!oldcard)
 		mmc_remove_card(card);
+	
+	pr_warn("Error in mmc_sd_init_card: %d", err);
 
 	return err;
 }
