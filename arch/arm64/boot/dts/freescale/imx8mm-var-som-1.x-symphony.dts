@@ -121,3 +121,27 @@
 		>;
 	};
 };
+
+&uart1 {
+ 	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1 &pinctrl_uart1_rs485_de>;
+ 	status = "okay";
+
+	/* RS485: driver enable is a GPIO on the carrier (SAI2_TXFS pad). */
+	linux,rs485-enabled-at-boot-time;
+	rs485-rts-active-high;
+	rs485-rts-delay = <0 0>;
+	rts-gpios = <&gpio4 24 GPIO_ACTIVE_HIGH>;
+};
+
+&iomuxc {
+	/*
+	* RS485 driver enable for UART1.
+	* Pad SAI2_TXFS is wired to the transceiver DE pin on the carrier.
+	*/
+	pinctrl_uart1_rs485_de: uart1rs485degrp {
+		fsl,pins = <
+			MX8MM_IOMUXC_SAI2_TXFS_GPIO4_IO24		0x140
+		>;
+	};
+};
